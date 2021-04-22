@@ -30,19 +30,33 @@ import java.util.List;
 )
 public class PersistentState implements PersistentStateComponent<PersistentState> {
 
-    /** 书架 */
+    /**
+     * 书架
+     */
     private List<Book> book;
-    /** 热键 */
+    /**
+     * 热键
+     */
     private String[] key;
-    /** 书架索引  */
+    /**
+     * 书架索引
+     */
     private Integer bookIndex;
-    /** V1.5 新增 数据源 */
+    /**
+     * V1.5 新增 数据源
+     */
     private String url;
-    /** 是否使用控制台 */
+    /**
+     * 是否使用控制台
+     */
     private boolean isConsole;
-    /** 自动翻页 */
+    /**
+     * 自动翻页
+     */
     private Integer nextInfoTime;
-    /** 字体大小 */
+    /**
+     * 字体大小
+     */
     private String fontStyle;
 
     public String getFontStyle() {
@@ -94,7 +108,7 @@ public class PersistentState implements PersistentStateComponent<PersistentState
     }
 
     public Integer getBookIndex() {
-        return bookIndex==null||bookIndex<0?0:bookIndex;
+        return bookIndex == null || bookIndex < 0 ? 0 : bookIndex;
     }
 
     public void setBookIndex(Integer bookIndex) {
@@ -103,12 +117,13 @@ public class PersistentState implements PersistentStateComponent<PersistentState
 
     /**
      * 新增书
+     *
      * @param book
      * @return 是否新增成功
      */
     public boolean addBook(Book book) {
-        if (this.book ==null) {
-            this.book=new ArrayList<>();
+        if (this.book == null) {
+            this.book = new ArrayList<>();
         }
         for (Book book1 : this.book) {
             if (book1.getUrl().equals(book.getUrl())) {
@@ -118,25 +133,28 @@ public class PersistentState implements PersistentStateComponent<PersistentState
         //自定义导入书籍分割文件
         if (Book.FILE_AUTH.equals(book.getAuth())) {
             Book split = FileSplitUtils.split(book);
-            if (split==null) {
-                MessageDialogBuilder.yesNo("提示","分割文件失败").show();
+            if (split == null) {
+                MessageDialogBuilder.yesNo("提示", "分割文件失败").show();
                 return false;
             }
-            book=split;
-        }else{
+            book = split;
+        } else {
             book.setChapters(NetworkUtil.getChapter(book.getUrl()));
         }
         this.book.add(book);
+        Integer bookIndex = getBookIndex();
+        setBookIndex(bookIndex + 1);
         return true;
     }
 
     /**
      * 删除书籍
+     *
      * @param index 索引
      * @return 是否删除成功
      */
-    public boolean delBook(int index){
-        if (index<0||index>book.size()) {
+    public boolean delBook(int index) {
+        if (index < 0 || index > book.size()) {
             return false;
         }
         if (Book.FILE_AUTH.equals(book.get(index).getAuth())) {
@@ -145,7 +163,7 @@ public class PersistentState implements PersistentStateComponent<PersistentState
             }
         }
         book.remove(index);
-        if (index==bookIndex) {
+        if (index == bookIndex) {
             bookIndex--;
         }
         return true;
@@ -153,24 +171,26 @@ public class PersistentState implements PersistentStateComponent<PersistentState
 
     /**
      * 更新热键
+     *
      * @param key
      * @param index
      */
-    public void setKeyMap(String key,int index){
-        this.key[index]=key;
+    public void setKeyMap(String key, int index) {
+        this.key[index] = key;
     }
 
 
     /**
      * 获取当前选中书籍
+     *
      * @return 当前选中书籍
      */
     public Book getBookByIndex() throws FishException {
-        if(book==null||book.size()==0){
+        if (book == null || book.size() == 0) {
             FishException.throwFishException("书架中还没有书,赶紧去添加吧！");
         }
-        if (bookIndex<0 || bookIndex>=book.size()){
-            this.bookIndex=book.size()-1;
+        if (bookIndex < 0 || bookIndex >= book.size()) {
+            this.bookIndex = book.size() - 1;
         }
         return this.book.get(bookIndex);
     }
